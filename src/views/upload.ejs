@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+      <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/676ca851f3.js" crossorigin="anonymous"></script>
+  <link rel="apple-touch-icon" href="https://shinai.my.id/nv.ico" />
+  <link rel="icon" type="image/x-icon" href="https://shinai.my.id/nv.ico" />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Environment Badge -->
+        <div class="flex justify-between items-center mb-8">
+            <a href="/" class="inline-flex items-center text-blue-500 hover:text-blue-600">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Home
+            </a>
+            <span class="px-3 py-1 rounded-full text-sm font-medium <%= isProduction ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+                <i class="fas <%= isProduction ? 'fa-server' : 'fa-laptop-code' %> mr-1"></i>
+                <%= environment.toUpperCase() %>
+            </span>
+        </div>
+
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">
+                <i class="fas fa-upload text-green-500 mr-3"></i>
+                Upload to <span class="capitalize"><%= provider %></span>
+            </h1>
+            <p class="text-gray-600 mt-2">
+                Files will be served through 
+                <code class="bg-gray-100 px-2 py-1 rounded"><%= appBaseUrl %>/<%= provider %>/filename</code>
+            </p>
+            <p class="text-sm text-gray-500 mt-1">
+                Example: <code><%= appBaseUrl %>/<%= provider %>/image.png</code>
+            </p>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div id="uploadArea" class="upload-area">
+                <i class="fas fa-cloud-upload-alt text-gray-400 text-5xl mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Drop files here</h3>
+                <p class="text-gray-500 mb-4">or click to select</p>
+                <input type="file" id="fileInput" class="hidden" />
+                <label for="fileInput" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg cursor-pointer transition duration-300">
+                    <i class="fas fa-folder-open mr-2"></i> Choose File
+                </label>
+                <p class="text-gray-400 text-sm mt-4">Maximum file size: 50MB</p>
+            </div>
+
+            <div id="progressContainer" class="mt-6 hidden">
+                <div class="flex justify-between mb-2">
+                    <span id="fileName" class="font-medium text-gray-700"></span>
+                    <span id="progressPercent" class="text-blue-600 font-medium">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="resultContainer" class="mt-6 hidden">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 text-xl mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="font-bold text-green-800 text-lg">Upload Successful!</h4>
+                            <p id="resultUrl" class="text-green-700 mt-2 break-all"></p>
+                            <div class="mt-4 flex flex-wrap gap-3">
+                                <button onclick="copyToClipboard()" class="inline-flex items-center bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                                    <i class="fas fa-copy mr-2"></i> Copy URL
+                                </button>
+                                <a id="viewLink" target="_blank" class="inline-flex items-center bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                                    <i class="fas fa-external-link-alt mr-2"></i> View File
+                                </a>
+                                <a id="markdownLink" target="_blank" class="inline-flex items-center bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                                    <i class="fas fa-code mr-2"></i> Markdown
+                                </a>
+                                <a id="htmlLink" target="_blank" class="inline-flex items-center bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                                    <i class="fas fa-code mr-2"></i> HTML
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="errorContainer" class="mt-6 hidden">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle text-red-500 text-xl mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="font-bold text-red-800 text-lg">Upload Failed</h4>
+                            <p id="errorMessage" class="text-red-700 mt-2"></p>
+                            <button onclick="retryUpload()" class="mt-3 inline-flex items-center bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                                <i class="fas fa-redo mr-2"></i> Try Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-code text-purple-500 mr-3"></i>API Endpoint
+            </h3>
+            
+            <div class="mb-6">
+                <div class="flex items-center mb-2">
+                    <span class="provider-badge badge-success mr-3">
+                        <i class="fas fa-check-circle mr-1"></i> POST
+                    </span>
+                    <code class="text-lg bg-gray-100 p-2 rounded break-all">POST <%= appBaseUrl %>/<%= provider %></code>
+                </div>
+                <p class="text-gray-600 text-sm">Content-Type: multipart/form-data</p>
+                <p class="text-gray-600 text-sm mt-1">Parameter: <code>file</code> (file to upload)</p>
+            </div>
+
+            <div class="mb-6">
+                <h4 class="font-semibold text-gray-700 mb-3">cURL Example:</h4>
+                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+curl -X POST \
+  "<%= appBaseUrl %>/<%= provider %>" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@/path/to/your/image.jpg"</pre>
+            </div>
+
+            <div>
+                <h4 class="font-semibold text-gray-700 mb-3">Example Response:</h4>
+                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+{
+    "success": true,
+    "url": "<%= appBaseUrl %>/<%= provider %>/image.jpg",
+    "provider": "<%= provider %>",
+    "originalName": "image.jpg",
+    "environment": "<%= environment %>"
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFile = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercent = document.getElementById('progressPercent');
+            const fileName = document.getElementById('fileName');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultUrl = document.getElementById('resultUrl');
+            const viewLink = document.getElementById('viewLink');
+            const markdownLink = document.getElementById('markdownLink');
+            const htmlLink = document.getElementById('htmlLink');
+            const errorContainer = document.getElementById('errorContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            const provider = '<%= provider %>';
+            const endpoint = '/<%= provider %>';
+
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                uploadArea.classList.add('dragover');
+            }
+
+            function unhighlight() {
+                uploadArea.classList.remove('dragover');
+            }
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            function handleFileSelect(e) {
+                const files = e.target.files;
+                handleFiles(files);
+            }
+
+            function handleFiles(files) {
+                if (files.length === 0) return;
+                
+                const file = files[0];
+                if (file.size > 50 * 1024 * 1024) {
+                    showError('File size exceeds 50MB limit');
+                    return;
+                }
+
+                uploadFile(file);
+            }
+
+            function uploadFile(file) {
+                resetUI();
+                currentFile = file;
+                
+                fileName.textContent = file.name;
+                progressContainer.classList.remove('hidden');
+                
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressPercent.textContent = Math.round(percentComplete) + '%';
+                    }
+                });
+
+                xhr.addEventListener('load', function() {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            showSuccess(response.url);
+                        } else {
+                            showError(response.error || 'Upload failed');
+                        }
+                    } catch (error) {
+                        showError('Error parsing response: ' + error.message);
+                    }
+                });
+
+                xhr.addEventListener('error', function() {
+                    showError('Network error occurred');
+                });
+
+                xhr.addEventListener('abort', function() {
+                    showError('Upload cancelled');
+                });
+
+                xhr.open('POST', endpoint);
+                xhr.send(formData);
+            }
+
+            function resetUI() {
+                progressContainer.classList.add('hidden');
+                resultContainer.classList.add('hidden');
+                errorContainer.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressPercent.textContent = '0%';
+            }
+
+            function showSuccess(url) {
+                resultUrl.textContent = url;
+                viewLink.href = url;
+                markdownLink.href = `javascript:void(0);`;
+                markdownLink.onclick = () => {
+                    const markdown = `![image](${url})`;
+                    navigator.clipboard.writeText(markdown).then(() => {
+                        alert('Markdown copied to clipboard!');
+                    });
+                };
+                htmlLink.href = `javascript:void(0);`;
+                htmlLink.onclick = () => {
+                    const html = `<img src="${url}" alt="image">`;
+                    navigator.clipboard.writeText(html).then(() => {
+                        alert('HTML copied to clipboard!');
+                    });
+                };
+                resultContainer.classList.remove('hidden');
+                progressContainer.classList.add('hidden');
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorContainer.classList.remove('hidden');
+                progressContainer.classList.add('hidden');
+            }
+
+            window.copyToClipboard = function() {
+                const url = resultUrl.textContent;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('URL copied to clipboard!');
+                });
+            };
+
+            window.retryUpload = function() {
+                if (currentFile) {
+                    uploadFile(currentFile);
+                } else {
+                    fileInput.click();
+                }
+            };
+        });
+    </script>
+</body>
+</html>

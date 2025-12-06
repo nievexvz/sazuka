@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="https://sazuka.onrender.com/css/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/676ca851f3.js" crossorigin="anonymous"></script>
+    <script src="https://sazuka.onrender.com/js/main.js" crossorigin></script>
+    <link rel="apple-touch-icon" href="https://shinai.my.id/nv.ico" />
+    <link rel="icon" type="image/x-icon" href="https://shinai.my.id/nv.ico" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex justify-end mb-4">
+        <span class="px-3 py-1 rounded-full text-sm font-medium <%= isProduction ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+          <i class="fas <%= isProduction ? 'fa-server' : 'fa-laptop-code' %> mr-1"></i>
+          <%= environment.toUpperCase() %> Mode
+        </span>
+      </div>
+      <header class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">
+          <i class="fas fa-cloud-upload-alt text-blue-500 mr-3"></i>
+          Multi-Provider CDN API
+        </h1>
+        <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+        Upload files to multiple CDN providers through a single API interface.
+        <% if (isProduction) { %>
+        All files will be served through <code class="bg-gray-100 px-2 py-1 rounded"><%= appBaseUrl %></code>
+        <% } else { %>
+        All files will be served through <code class="bg-gray-100 px-2 py-1 rounded"><%= appBaseUrl %></code>
+        <% } %>
+        </p>
+      </header>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+        <% providers.forEach(provider => { %>
+        <div class="card bg-white rounded-xl shadow-lg p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-server text-blue-500 text-xl"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-xl text-gray-800 capitalize"><%= provider.name %></h3>
+              <p class="text-gray-500 text-sm">CDN Provider</p>
+            </div>
+          </div>
+          <div class="mb-4">
+            <code class="text-sm bg-gray-100 p-2 rounded block truncate">POST <%= appBaseUrl %><%= provider.endpoint %></code>
+          </div>
+          <a href="<%= provider.endpoint %>" 
+             class="block w-full bg-blue-500 hover:bg-blue-600 text-white text-center font-medium py-2 px-4 rounded-lg transition duration-300">
+             <i class="fas fa-upload mr-2"></i>Upload Now
+          </a>
+        </div>
+        <% }); %>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+          <i class="fas fa-api text-green-500 mr-3"></i>API Usage Examples
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">cURL Example</h3>
+            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+curl -X POST \
+  <%= appBaseUrl %>/deline \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@/path/to/your/file.jpg'</pre>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">JavaScript Fetch Example</h3>
+            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+fetch('<%= appBaseUrl %>/deline', {
+    method: 'POST',
+    body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data.url));</pre>
+          </div>
+        </div>
+        <div class="mt-8">
+          <h3 class="text-xl font-semibold text-gray-700 mb-4">Try All Providers at Once</h3>
+          <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+curl -X POST \
+  <%= appBaseUrl %>/upload/all \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@/path/to/your/file.jpg'</pre>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+          <i class="fas fa-info-circle text-purple-500 mr-3"></i>Response Format
+        </h2>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p class="text-blue-800">
+          <i class="fas fa-exclamation-circle mr-2"></i>
+          <% if (isProduction) { %>
+          All URLs will be served through <strong>https://sazuka.onrender.com</strong>
+          <% } else { %>
+          All URLs will be served through <strong><%= appBaseUrl %></strong>
+          <% } %>
+          </p>
+        </div>
+        <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+{
+    "success": true,
+    "url": "<%= appBaseUrl %>/deline/filename.jpg,
+    "provider": "deline",
+    "originalName": "yourfile.jpg",
+    "environment": "<%= environment %>"
+}</pre>
+      </div>
+      <footer class="mt-12 text-center text-gray-500 text-sm">
+        <p>Sazuka &copy; 2025</p>
+        <p class="mt-2">
+          <i class="fas fa-code mr-1"></i>
+          Powered by 15+ CDN Providers
+        </p>
+        <p class="mt-1">
+          <i class="fas fa-globe mr-1"></i>
+          Current Domain: <%= appBaseUrl %>
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
