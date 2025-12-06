@@ -21,7 +21,7 @@ router.get('/env', getEnvironment);
 const providers = [
     'deline', 'nekohime', 'yupra', 'quax', 'uguu', 'lanny',
     'gyazo', 'imgbb', 'imgkit', 'cloudinary', 'tmpfiles',
-    'nauval', 'zenxx', 'shinai', 'catbox', 'zenitsu', 'hamzzz', '0x0', 'lunara', 'zynaaa'
+    'nauval', 'zenxx', 'shinai', 'catbox', 'zenitsu', 'hamzzz', '0x0' // 'lunara', 'zynaaa'
 ];
 
 // Buat route untuk setiap provider

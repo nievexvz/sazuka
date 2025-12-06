@@ -184,7 +184,7 @@ app.get('/health', (req, res) => {
     supportedProviders: [
       'deline', 'nekohime', 'yupra', 'quax', 'uguu', 'lanny',
       'gyazo', 'imgbb', 'imgkit', 'cloudinary', 'tmpfiles',
-      'nauval', 'zenxx', 'shinai', 'catbox', 'zenitsu', 'hamzzz', '0x0', 'lunara', 'zynaaa'
+      'nauval', 'zenxx', 'shinai', 'catbox', 'zenitsu', 'hamzzz', '0x0' // 'lunara', 'zynaaa'
     ]
   });
 });
@@ -196,7 +196,7 @@ app.use((req, res, next) => {
     const providers = [
       'deline', 'nekohime', 'yupra', 'quax', 'uguu', 'lanny',
       'gyazo', 'imgbb', 'imgkit', 'cloudinary', 'tmpfiles',
-      'nauval', 'zenxx', 'shinai', 'catbox', 'zenitsu', 'hamzzz', '0x0', 'lunara', 'zynaaa'
+      'nauval', 'zenxx', 'shinai', 'catbox', 'zenitsu', 'hamzzz', '0x0' // 'lunara', 'zynaaa'
     ];
     
     return res.status(404).render('error', {

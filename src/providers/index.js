@@ -1040,7 +1040,8 @@ class ProviderManager {
       throw new Error(`Shinai: ${errorMessage}`);
     }
   }
-
+  
+  /* 
   // ==================== LUNARA ====================
   async uploadToLunara(fileBuffer, originalname) {
     try {
@@ -1190,6 +1191,7 @@ class ProviderManager {
       throw new Error(`Zynaaa: ${errorMessage}`);
     }
   }
+  */
 
   getMimeType(filename) {
     const ext = filename.split('.').pop().toLowerCase();
@@ -1232,9 +1234,9 @@ class ProviderManager {
       'catbox': this.uploadToCatbox?.bind(this),
       'zenitsu': this.uploadToZenitsu?.bind(this),
       'hamzzz': this.uploadToHamzzz?.bind(this),
-      '0x0': this.uploadTo0x0?.bind(this),
-      'lunara': this.uploadToLunara?.bind(this),
-      'zynaaa': this.uploadToZynaaa?.bind(this)
+      '0x0': this.uploadTo0x0?.bind(this)
+    // 'lunara': this.uploadToLunara?.bind(this),
+    // 'zynaaa': this.uploadToZynaaa?.bind(this)
     };
 
     console.log(`🔍 Checking provider "${provider}":`, providerMap[provider] ? 'EXISTS' : 'UNDEFINED');

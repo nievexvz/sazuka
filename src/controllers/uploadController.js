@@ -19,9 +19,9 @@ const allProviders = [
     { name: 'catbox', endpoint: '/catbox', displayName: 'CatBox' },
     { name: 'zenitsu', endpoint: '/zenitsu', displayName: 'Zenitsu' },
     { name: 'hamzzz', endpoint: '/hamzzz', displayName: 'Hamzzz' },
-    { name: '0x0', endpoint: '/0x0', displayName: '0x0.st' },
-    { name: 'lunara', endpoint: '/lunara', displayName: 'Lunara' },
-    { name: 'zynaaa', endpoint: '/zynaaa', displayName: 'Zynaaa' }
+    { name: '0x0', endpoint: '/0x0', displayName: '0x0.st' }
+  // { name: 'lunara', endpoint: '/lunara', displayName: 'Lunara' },
+  // { name: 'zynaaa', endpoint: '/zynaaa', displayName: 'Zynaaa' }
 ];
 
 const providerNames = allProviders.map(p => p.name);
