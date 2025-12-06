@@ -1044,7 +1044,7 @@ class ProviderManager {
   // ==================== LUNARA ====================
   async uploadToLunara(fileBuffer, originalname) {
     try {
-      console.log(`📤 [${this.nodeEnv.toUpperCase()}] Uploading to Lunara: ${originalname}`);
+      console.log(`📤 [${this.nodeEnv.toUpperCase()}] Uploading to Lunara: ${originalname} (${fileBuffer.length} bytes)`);
 
       const formData = new FormData();
       formData.append('file', fileBuffer, originalname);
@@ -1052,12 +1052,16 @@ class ProviderManager {
       formData.append('expire_value', '24');
       formData.append('expire_unit', 'hours');
 
+      // Debug: cek formData
+      const formHeaders = formData.getHeaders();
+      console.log('📋 FormData headers:', formHeaders);
+
       const response = await axios.post(
         'https://lunara.drizznesiasite.biz.id/upload',
         formData,
         {
           headers: {
-            ...formData.getHeaders(),
+            ...formHeaders,
             'Accept': 'application/json'
           },
           timeout: 30000,
@@ -1066,7 +1070,8 @@ class ProviderManager {
         }
       );
 
-      console.log('✅ Lunara response:', response.data);
+      console.log('✅ Lunara response status:', response.status);
+      console.log('✅ Lunara response data:', response.data);
 
       const data = response.data;
 
@@ -1079,14 +1084,22 @@ class ProviderManager {
       }
 
       const fileName = this.extractFileName(data.file_url, originalname);
+      console.log(`✅ Lunara success: ${fileName}`);
       return this.getCustomUrl('lunara', fileName);
 
     } catch (error) {
-      console.error('❌ Lunara error:', {
+      console.error('❌ Lunara error details:', {
         message: error.message,
         code: error.code,
-        response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          headers: error.config?.headers
+        }
       });
 
       let errorMessage = 'Upload failed';
@@ -1094,13 +1107,17 @@ class ProviderManager {
       if (error.code === 'ECONNABORTED') {
         errorMessage = 'Connection timeout';
       } else if (error.code === 'ENOTFOUND') {
-        errorMessage = 'Cannot resolve host';
+        errorMessage = 'Cannot resolve host: lunara.drizznesiasite.biz.id';
       } else if (error.response?.status === 413) {
         errorMessage = 'File too large';
+      } else if (error.response?.status === 415) {
+        errorMessage = 'Unsupported media type';
       } else if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
+      } else if (error.response?.status === 502 || error.response?.status === 503) {
+        errorMessage = 'Lunara server is down or under maintenance';
       }
 
       throw new Error(`Lunara: ${errorMessage}`);
